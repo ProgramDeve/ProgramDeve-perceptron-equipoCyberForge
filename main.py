@@ -1,21 +1,22 @@
 """Entrena y evalúa los modelos de Perceptrón.
 
+
 Uso:
     python main.py --datos datos/pacientes.csv --objetivo diagnostico
 """
 import argparse
 import sys
 
+
 from src.datos import cargar_datos, limpiar, estandarizar, dividir
 from src.perceptron import Perceptron
-from src.metricas import accuracy
+from src.metricas import accuracy, error_clasificacion, matriz_confusion
 from src.excepciones import DatosInvalidosError, ModeloNoEntrenadoError
 
-from src.datos import cargar_datos, limpiar, estandarizar, dividir
-from src.perceptron import Perceptron
-from src.metricas import accuracy
 
 FEATURES_BASE = ["radio", "textura", "perimetro", "area"]
+
+
 
 
 def main():
@@ -24,7 +25,9 @@ def main():
     parser.add_argument("--objetivo", default="diagnostico")
     args = parser.parse_args()
 
+
     df = cargar_datos(args.datos, args.objetivo)
+
 
     # ---------------- Modelo 1: básico ----------------
     datos = limpiar(df, FEATURES_BASE)
@@ -36,7 +39,10 @@ def main():
     y_pred = modelo1.predecir(X_te)
     print("Modelo 1 (tasa 0.01)")
     print("  accuracy:", round(accuracy(y_te, y_pred), 3))
+    print("  error:", round(error_clasificacion(y_te, y_pred), 3))
+    print("  matriz de confusion:", matriz_confusion(y_te, y_pred).tolist())
     print("  errores por época:", modelo1.errores_por_epoca[:10], "...")
+
 
     # ---------------- Modelo 2: tasa grande ----------------
     datos = limpiar(df, FEATURES_BASE)
@@ -48,10 +54,11 @@ def main():
     y_pred = modelo2.predecir(X_te)
     print("Modelo 2 (tasa 0.5)")
     print("  accuracy:", round(accuracy(y_te, y_pred), 3))
+    print("  error:", round(error_clasificacion(y_te, y_pred), 3))
+    print("  matriz de confusion:", matriz_confusion(y_te, y_pred).tolist())
     print("  errores por época:", modelo2.errores_por_epoca[:10], "...")
 
-    # ---------------- Modelo 3: otras features ----------------
-    # Tarea 5: permitir elegir las features con --features
+
 
 
 if __name__ == "__main__":
