@@ -5,11 +5,8 @@ import numpy as np
 from src.excepciones import ModeloNoEntrenadoError
 
 
-
-
 class Perceptron:
     """Clasificador binario: predice 1 si X·w + b >= 0, si no 0."""
-
 
     def __init__(self, tasa_aprendizaje=0.01, epocas=50, decaimiento=0.0):
         if tasa_aprendizaje <= 0:
@@ -24,7 +21,6 @@ class Perceptron:
         self.w = None
         self.b = 0.0
         self.errores_por_epoca = []
-
 
     def entrenar(self, X, y):
         """Ajusta los pesos con la regla del Perceptrón. Devuelve self."""
@@ -43,9 +39,10 @@ class Perceptron:
             self.errores_por_epoca.append(errores)
         return self
 
-
     def predecir(self, X):
         """Devuelve un array de 0 y 1, uno por fila de X."""
         if self.w is None:
-            raise ModeloNoEntrenadoError("El modelo no ha sido entrenado. Llama a entrenar() primero.")
+            raise ModeloNoEntrenadoError(
+                "El modelo no ha sido entrenado. Llama a entrenar() primero."
+            )
         return np.where(X @ self.w + self.b >= 0, 1, 0)
