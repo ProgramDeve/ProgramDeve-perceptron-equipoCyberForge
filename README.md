@@ -1,43 +1,36 @@
-# Clasificador de tumores con Perceptrón — versión 0.9.0
-
-Proyecto base de la **Evaluación Parcial** de Construcción de Software. Un Perceptrón implementado desde cero
-con NumPy clasifica tumores de mama como **malignos (0)** o **benignos (1)** a partir de medidas de las células.
-
-## Datos
-
-- `datos/pacientes.csv`: 569 pacientes, 10 medidas y la columna `diagnostico`.
-  Proviene del dataset *Breast Cancer Wisconsin (Diagnostic)* (UCI). Se borraron algunos valores para practicar la limpieza.
-- `datos/hospital_b.csv`: 60 pacientes de otro hospital. Se usa para reproducir el error del Issue de la Tarea 1.
-
-## Estructura
-
-```text
-├── datos/                 # archivos CSV
-├── src/
-│   ├── datos.py           # cargar, limpiar, estandarizar y dividir
-│   ├── perceptron.py      # clase Perceptron
-│   └── metricas.py        # accuracy y otras métricas
-├── main.py                # entrena y evalúa los modelos
-├── .github/workflows/ci.yml
-├── CHANGELOG.md
-└── requirements.txt
-```
-
-## Cómo ejecutarlo
-
-```bash
-pip install -r requirements.txt
-python main.py --datos datos/pacientes.csv --objetivo diagnostico
-```
-
 ## Integrantes
 
 | Nombre | Código | Rol |
 |---|---|---|
-| | | Líder |
-| | | |
-| | | |
+| Jorge Alvaro Turpo Chilo | 76147024 | Líder |
+| Juan Gustavo Segura Villegas | (código) | Desarrollador |
+| Katsumi Albert Mamani Corrales | 74842690 | Desarrollador |
+| Emanuel Paz Mottoccanchi | (código) | Desarrollador |
 
 ## Resultados
 
-_Se completa en la Tarea 7._
+Métricas de los 3 modelos sobre datos/pacientes.csv:
+
+| Modelo | Accuracy | Error | Matriz de confusión |
+|---|---|---|---|
+| Modelo 1 (tasa 0.01) | 0.867 | 0.133 | [[34, 4], [11, 64]] |
+| Modelo 2 (tasa 0.5, decaimiento 0.1) | 0.876 | 0.124 | [[37, 1], [13, 62]] |
+| Modelo 3 (features: concavidad, puntos_concavos, area, textura) | 0.92 | 0.08 | [[35, 3], [6, 69]] |
+
+### Análisis
+
+**1. ¿Por qué los Modelos 1 y 2 daban igual antes de la Tarea 4, si sus tasas eran distintas?**
+
+Porque el Perceptrón clásico converge a la misma frontera de decisión si los datos son linealmente separables, sin importar la tasa de aprendizaje (mientras sea positiva). La tasa solo afecta la velocidad de convergencia, no el resultado final. Al agregar el decaimiento, la tasa efectiva cambia a lo largo de las épocas y el modelo llega a una solución distinta.
+
+**2. ¿Qué cambió con las features del Modelo 3 y por qué?**
+
+El Modelo 3 usa features más informativas para este problema: concavidad, puntos_concavos, area y textura. Estas variables separan mejor las clases (maligno vs benigno) porque describen la irregularidad del contorno del tumor. El accuracy sube de 0.876 a 0.92.
+
+**3. Los errores por época nunca llegan a 0: ¿qué dice eso sobre si los datos son linealmente separables?**
+
+Que los datos NO son perfectamente separables linealmente. El Perceptrón solo garantiza convergencia cuando los datos son separables linealmente. Como los errores oscilan sin llegar a 0, hay puntos mal clasificados que ninguna recta puede separar de forma perfecta.
+
+**4. En este problema, ¿qué error es más grave, un falso positivo o un falso negativo?**
+
+Un **falso negativo** es más grave. Un falso negativo significa clasificar un tumor maligno como benigno (o al revés, según la codificación), lo que llevaría a no tratar a un paciente enfermo. Un falso positivo solo implicaría pruebas adicionales. En salud, siempre se prioriza minimizar los falsos negativos.
