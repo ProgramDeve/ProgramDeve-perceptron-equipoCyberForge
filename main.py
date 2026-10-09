@@ -1,33 +1,34 @@
 """Entrena y evalúa los modelos de Perceptrón.
 
-
 Uso:
     python main.py --datos datos/pacientes.csv --objetivo diagnostico
 """
 import argparse
 import sys
 
-
 from src.datos import cargar_datos, limpiar, estandarizar, dividir
 from src.perceptron import Perceptron
 from src.metricas import accuracy, error_clasificacion, matriz_confusion
 from src.excepciones import DatosInvalidosError, ModeloNoEntrenadoError
 
-
 FEATURES_BASE = ["radio", "textura", "perimetro", "area"]
-
-
+FEATURES_MODELO3 = ["concavidad", "puntos_concavos", "area", "textura"]
 
 
 def main():
     parser = argparse.ArgumentParser(description="Clasificador con Perceptrón")
     parser.add_argument("--datos", default="datos/pacientes.csv")
     parser.add_argument("--objetivo", default="diagnostico")
+    parser.add_argument("--features", nargs="+", default=FEATURES_MODELO3,
+                        help="Features para el Modelo 3")
     args = parser.parse_args()
-
 
     df = cargar_datos(args.datos, args.objetivo)
 
+    # Validar que las features del Modelo 3 existan
+    faltantes = [f for f in args.features if f not in df.columns]
+    if faltantes:
+        raise DatosInvalidosError(f"Columnas inexistentes: {', '.join(faltantes)}")
 
     # ---------------- Modelo 1: básico ----------------
     datos = limpiar(df, FEATURES_BASE)
@@ -43,7 +44,6 @@ def main():
     print("  matriz de confusion:", matriz_confusion(y_te, y_pred).tolist())
     print("  errores por época:", modelo1.errores_por_epoca[:10], "...")
 
-
     # ---------------- Modelo 2: tasa grande con decaimiento ----------------
     datos = limpiar(df, FEATURES_BASE)
     X = estandarizar(datos[FEATURES_BASE].to_numpy(dtype=float))
@@ -58,7 +58,20 @@ def main():
     print("  matriz de confusion:", matriz_confusion(y_te, y_pred).tolist())
     print("  errores por época:", modelo2.errores_por_epoca[:10], "...")
 
-
+    # ---------------- Modelo 3: otras features ----------------
+    datos = limpiar(df, args.features)
+    X = estandarizar(datos[args.features].to_numpy(dtype=float))
+    y = datos[args.objetivo].to_numpy()
+    X_tr, X_te, y_tr, y_te = dividir(X, y)
+    modelo3 = Perceptron(tasa_aprendizaje=0.01, epocas=30)
+    modelo3.entrenar(X_tr, y_tr)
+    y_pred = modelo3.predecir(X_te)
+    print("Modelo 3 (features personalizadas)")
+    print("  features:", args.features)
+    print("  accuracy:", round(accuracy(y_te, y_pred), 3))
+    print("  error:", round(error_clasificacion(y_te, y_pred), 3))
+    print("  matriz de confusion:", matriz_confusion(y_te, y_pred).tolist())
+    print("  errores por época:", modelo3.errores_por_epoca[:10], "...")
 
 
 if __name__ == "__main__":
