@@ -9,6 +9,11 @@ import sys
 from src.datos import cargar_datos, limpiar, estandarizar, dividir
 from src.perceptron import Perceptron
 from src.metricas import accuracy
+from src.excepciones import DatosInvalidosError, ModeloNoEntrenadoError
+
+from src.datos import cargar_datos, limpiar, estandarizar, dividir
+from src.perceptron import Perceptron
+from src.metricas import accuracy
 
 FEATURES_BASE = ["radio", "textura", "perimetro", "area"]
 
@@ -50,4 +55,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (DatosInvalidosError, ValueError, ModeloNoEntrenadoError) as e:
+        print(f"Error: {e}")
+        sys.exit(1)

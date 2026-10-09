@@ -8,7 +8,21 @@ def cargar_datos(ruta, objetivo):
 
     `objetivo` es el nombre de la columna con la clase (0 o 1).
     """
+    import os
+    from src.excepciones import DatosInvalidosError
+
+    if not os.path.exists(ruta):
+        raise DatosInvalidosError(f"No existe el archivo {ruta}")
+
     df = pd.read_csv(ruta)
+
+    if objetivo not in df.columns:
+        raise DatosInvalidosError(f"La columna '{objetivo}' no existe en el archivo")
+
+    valores_unicos = df[objetivo].dropna().unique()
+    if len(valores_unicos) != 2:
+        raise DatosInvalidosError(f"La columna '{objetivo}' no es binaria (tiene {len(valores_unicos)} valores distintos)")
+
     return df
 
 
